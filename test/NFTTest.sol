@@ -107,6 +107,16 @@ contract NFTTest is Test {
         nft.withdrawPayments(payee);
         assertEq(payee.balance, priorPayeeBalance + nftBalance);
     }
+
+    function test_WithdrawalFailsAsOwner() public {
+        Receiver receiver = new Receiver();
+        nft.mintTo{value: nft.PRICE()}(address(receiver));
+        assertEq(address(nft).balance, nft.PRICE());
+        vm.expectRevert("Ownable: caller is not the owner");
+        vm.startPrank(address(0xd3ad));
+        nft.withdrawPayments(payable(address(0xd3ad)));
+        vm.stopPrank();
+    }
 }
 
 contract Receiver is ERC721TokenReceiver {
